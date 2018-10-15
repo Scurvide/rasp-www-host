@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
-from Control.models import Raspi, Datapoint
+from Datamana.models import Raspi, Datapoint
 import json
 
 @ensure_csrf_cookie

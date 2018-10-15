@@ -1,7 +1,7 @@
 import requests
 import json
 
-url = 'http://192.168.1.107:8650/Control/'
+url = 'http://192.168.1.107:8000/Data/'
 client = requests.session()
 csrf = client.get( url ).cookies[ 'csrftoken' ]
 
