@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
-from Datamana.models import Client, Datatype, Datapoint
+from Datamana.models import Client, Command, Datapoint
 
 
 def index( request ):
