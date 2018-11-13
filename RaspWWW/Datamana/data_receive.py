@@ -51,13 +51,18 @@ def index( request ):
 
         data = Datapoint.objects.create( client = client, command = com, point = point )
 
-        return HttpResponse(
+        # Construct response with current command for operation
+        response = json.dumps({
+            'command': client.current_command,
+            'msg':
             'Datapoint successfully saved to database. Client('
             + client.name +
             ') Data type('
             + com.name +
             ') Point('
-            + str(data.point) + ')' )
+            + str(data.point) + ')'
+            })
+        return HttpResponse( response )
 
     return HttpResponse( "Get Csrf Tokens here!" )
 

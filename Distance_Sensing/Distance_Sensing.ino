@@ -12,7 +12,7 @@ const int msgDistance   = '7';  // Message for returning current distance readin
 const int msgTally      = '3';  // Message for returning 1 when something passed by
 const int attempts      = 10;   // Reattempts if sonar value is 0
 const int attemptDelay  = 50;   // Milliseconds. Min 29ms
-const int sample        = 5;    // How many values will be used for tallying
+const int sample        = 10;    // How many values will be used for tallying
 const int tallyTrigger  = 20;   // Change distance change required for tally trigger (cm)
 
 // Variables

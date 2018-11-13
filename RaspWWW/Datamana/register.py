@@ -29,26 +29,28 @@ def index( request ):
             response.status_code = 400
             return response
 
-        if payload[ 'secretId' ] == 'None':
+        secretId = payload[ 'secretId' ]
+        name = payload[ 'name' ]
+        commands = payload[ 'commands' ]
+
+        # Check if secretId and name exists. If not, create randoms
+        if secretId == 'None':
             # Create random secretId
             secretId = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(secretIdLen))
-            if payload[ 'name' ] == 'None':
+            if name == 'None':
                 # Create name
                 name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
-            else:
-                name = payload[ 'name' ]
             success = False
             while success == False:
             # Create new client object
                 try:
-                    client = Client.objects.create( name = name, secretId = secretId )
+                    client = Client.objects.create( name = name, secretId = secretId, current_command = commands[0] )
                     success = True
                 except IntegrityError:
                     # Name or id needs to be unique
-                    name = ''.join(random.choice(string.ascii) for _ in range(randomNameLen))
-                    secretId = ''.join(random.choice(string.ascii + string.digits) for _ in range(secretIdLen))
+                    name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
+                    secretId = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(secretIdLen))
         else:
-            secretId = payload[ 'secretId' ]
             try:
                 client = Client.objects.get( secretId = secretId )
             except ObjectDoesNotExist:
@@ -56,14 +58,13 @@ def index( request ):
                 response.status_code = 400
                 return response
             try:
-                client.name = payload[ 'name' ]
+                client.name = name
             except IntegrityError:
                 response = HttpResponse( 'Name already in use' )
                 response.status_code = 400
                 return response
 
         # Create commands if needed
-        commands = payload[ 'commands' ]
         for command in commands:
             command = command.lower()
             try:
@@ -72,9 +73,11 @@ def index( request ):
                 com = Command.objects.create( name = command )
             com.client.add( client )
 
+        # Returns client info and first listed command as command
         response = json.dumps({
             'name': client.name,
             'secretId': client.secretId,
+            'command': client.current_command
             })
         return HttpResponse( response )
 

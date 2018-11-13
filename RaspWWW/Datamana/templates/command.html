@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Command</title>
+
+  </head>
+  <body>
+
+    {% for client in clients %}
+    <div>
+      <h3>{{ client.name }}</h3>
+      <p>{{ client.current_command }}</p>
+      {% for command in client.command_set.all %}
+      <form action = '/command/{{ client.name }}/{{ command.name }}'>
+        <input type = 'submit' value = '{{ command.name }}'></input>
+      </form>
+      {% endfor %}
+    </div>
+    {% endfor %}
+
+  </body>
+</html>

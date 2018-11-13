@@ -3,6 +3,7 @@ from django.db import models
 class Client( models.Model ):
     name = models.CharField( max_length = 30, unique = True )
     secretId = models.CharField( max_length = 30, unique = True )
+    current_command = models.CharField( max_length = 30 )
 
 class Command( models.Model ):
     name = models.CharField( max_length = 30, unique = True )
