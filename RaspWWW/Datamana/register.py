@@ -57,7 +57,7 @@ def index( request ):
                 client = Client.objects.get( secretId = secretId )
             except ObjectDoesNotExist:
                 response = HttpResponse( 'Secret Id not valid, use None to assign new Id' )
-                response.status_code = 400
+                response.status_code = 406
                 return response
             try:
                 client.name = name

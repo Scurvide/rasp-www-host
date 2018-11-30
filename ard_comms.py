@@ -24,7 +24,11 @@ def getDistance():
     output = ''
     output = ard.readline()
     if output != '' and output != b'':
-        output = float(output)
+        try:
+            output = float(output)
+        except ValueError:
+            print( 'Arduino overflow buffer error. Continuing...' )
+            return False, ''
         # Check if no data of value was received
         if output > 0:
             output = output / 100
@@ -46,12 +50,15 @@ def tally():
     if buffer == 3 or buffer == 6 or buffer == 9 or buffer == 12:
         output = ard.readline()
         if output != '' and output != b'':
-            output = int(output)
+            try:
+                output = float(output)
+            except ValueError:
+                print( 'Arduino overflow buffer error. Continuing...' )
+                return False, ''
             if output == 1:
                 print( 'Something went past' )
                 return output
-    else:
-        if buffer != 0:
-            ard.reset_input_buffer()
-            print( 'Serial input buffer reset' )
+    elif buffer != 0:
+        ard.reset_input_buffer()
+        print( 'Serial input buffer reset' )
     return False

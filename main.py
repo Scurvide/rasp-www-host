@@ -3,7 +3,7 @@ from web_comms import *
 import time, threading, os
 
 # Options
-deleteDataOnBoot    = True        # Reset device to register again on boot
+deleteDataOnBoot    = False       # Reset device to register again on boot
 name = 'Mog'                      # Desired device name (if available)
 commands = [                      # Commands for this device
     'stop',
@@ -23,6 +23,14 @@ def registration():
     res = register( commands, name )
     if res == True:
         return True
+    elif res == 'Reset':
+        with open('client_info.json') as client_info:
+            info = json.load(client_info)
+        info['name'] = name
+        info['secretId'] = 'None'
+        with open('client_info.json', 'w') as client_info:
+            json.dump( info, client_info )
+        print( 'Client info reset to request new Id on next try' )
     return False
 
 def getCommand():
@@ -67,6 +75,7 @@ def mainLoop( lastRefresh = time.time() ):
 def initialization():
     if deleteDataOnBoot == True:
         os.remove('client_info.json')
+        print( ' ' )
         print( 'Client info deleted ')
         print( '---------------------------------' )
     if registration():

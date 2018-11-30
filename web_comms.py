@@ -4,7 +4,7 @@ import json, time, requests
 # Options
 urlSend     = 'http://192.168.1.107:8000/send/'      # Url for sending data
 urlRegister = 'http://192.168.1.107:8000/register/'  # Url for registering device
-timeout     = 20                                     # Request timeout (seconds)
+timeout     = 5                                      # Request timeout (seconds)
 failTimeout = 2                                      # Timeout if connection fails
 
 def postData( data, unit = '' ):
@@ -20,11 +20,11 @@ def postData( data, unit = '' ):
     # Start session and get csrf token
     try:
         client = requests.session()
-    except ConnectionError:
+        csrf = client.get( urlSend, timeout = timeout ).cookies[ 'csrftoken' ]
+    except requests.exceptions.RequestException:
         print( 'Connection failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
         time.sleep( failTimeout )
         return False
-    csrf = client.get( urlSend ).cookies[ 'csrftoken' ]
 
     # Construct package
     payload = {
@@ -41,7 +41,7 @@ def postData( data, unit = '' ):
     # Send post and retrieve response
     try:
         resp = client.post( urlSend, data = payload, headers = headers, timeout = timeout )
-    except ConnectionError:
+    except requests.exceptions.RequestException:
         print( 'Post failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
         time.sleep( failTimeout )
         return False
@@ -77,11 +77,11 @@ def register( commands, name = 'None', secretId = 'None' ):
     # Start session and get csrf token
     try:
         client = requests.session()
-    except ConnectionError:
+        csrf = client.get( urlRegister, timeout = timeout ).cookies[ 'csrftoken' ]
+    except requests.exceptions.RequestException:
         print( 'Connection failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
         time.sleep( failTimeout )
         return False
-    csrf = client.get( urlRegister ).cookies[ 'csrftoken' ]
 
     # Construct package
     payload = {
@@ -95,7 +95,7 @@ def register( commands, name = 'None', secretId = 'None' ):
     # Send post and retrieve response
     try:
         resp = client.post( urlRegister, data = payload, headers = headers, timeout = timeout )
-    except ConnectionError:
+    except requests.exceptions.RequestException:
         print( 'Post failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
         time.sleep( failTimeout )
         return False
@@ -103,6 +103,9 @@ def register( commands, name = 'None', secretId = 'None' ):
     # Handle response
     if resp.status_code == 200:
         content = json.loads(resp.content)
+    elif resp.status_code == 406:
+        print( resp.content )
+        return 'Reset'
     else:
         print( resp.content )
         return False
