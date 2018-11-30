@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+
+<html>
+  <head>
+
+    <title>Control Center</title>
+
+    <!-- CSS -->
+    <link rel = 'stylesheet' href = "{% static 'css/base.css' %}">
+    <!-- Favicon -->
+    <link rel = 'icon' type = 'image/png' href = "{% static 'favicon/CC-favicon.png' %}" sizes = '96x96'>
+    <!-- jQuery -->
+    <script src = "https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <!-- JS -->
+    <script src = "{% static 'js/base.js' %}"></script>
+
+  </head>
+  <header>
+
+    <h3> Data Collection Control Center </h3>
+    <div id = 'links' style = 'margin-bottom: 10px'>
+      <a id = 'dataLink' href = '/data' class = 'button'> Data </a>
+      <a id = 'commandLink' href = '/command' class = 'button'> Commands </a>
+      <a id = 'deleteLink' href = '/delete' class = 'button'> Delete </a>
+    </div>
+
+  </header>
+  <body>
+
+    {% block content %}
+    {% endblock content %}
+
+  </body>
+</html>

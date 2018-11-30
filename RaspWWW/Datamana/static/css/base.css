@@ -1,0 +1,24 @@
+a {
+text-decoration: none;
+}
+
+.button {
+  background-color: black;
+  border: 0px;
+  border-radius: 3px;
+  box-shadow: 0px 0px 7px black;
+  color: white;
+  text-shadow: 0px 0px 10px black;
+  padding: 1px 6px 1px 6px;
+  margin: 5px;
+  font-family: monospace;
+  font-size: 15px;
+  cursor: pointer;
+  outline: 0;
+}
+
+.commandsDiv, .dataTable, #clients {
+  vertical-align: top;
+  position: relative;
+  display: inline-block;
+}

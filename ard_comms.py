@@ -28,10 +28,11 @@ def getDistance():
         # Check if no data of value was received
         if output > 0:
             output = output / 100
-            print( 'Distance: ' + str(output) + 'm' )
-            return output
+            unit = 'm'
+            print( 'Distance: ' + str(output) + unit )
+            return output, unit
     print( 'Failed to receive distance data' )
-    return False
+    return False, ''
 
 # Returns True if something goes past
 def tally():

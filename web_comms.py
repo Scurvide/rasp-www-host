@@ -1,11 +1,13 @@
+from requests.exceptions import ConnectionError
 import json, time, requests
 
 # Options
 urlSend     = 'http://192.168.1.107:8000/send/'      # Url for sending data
 urlRegister = 'http://192.168.1.107:8000/register/'  # Url for registering device
-timeout     =  20                                    # Request timeout (seconds)
+timeout     = 20                                     # Request timeout (seconds)
+failTimeout = 2                                      # Timeout if connection fails
 
-def postData( data ):
+def postData( data, unit = '' ):
 
     # Try to get client info from file
     try:
@@ -16,7 +18,12 @@ def postData( data ):
         return False
 
     # Start session and get csrf token
-    client = requests.session()
+    try:
+        client = requests.session()
+    except ConnectionError:
+        print( 'Connection failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
+        time.sleep( failTimeout )
+        return False
     csrf = client.get( urlSend ).cookies[ 'csrftoken' ]
 
     # Construct package
@@ -24,14 +31,20 @@ def postData( data ):
         'name': file[ 'name' ],
         'secretId': file[ 'secretId' ],
         'command': file[ 'command' ],
-        'point': data
+        'point': data,
+        'unit': unit
         }
     payload = json.dumps( payload )
     headers = { 'X-CSRFToken': csrf }
 
     print( 'Sending data to database...' )
     # Send post and retrieve response
-    resp = client.post( urlSend, data = payload, headers = headers, timeout = timeout )
+    try:
+        resp = client.post( urlSend, data = payload, headers = headers, timeout = timeout )
+    except ConnectionError:
+        print( 'Post failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
+        time.sleep( failTimeout )
+        return False
 
     # Handle response
     if resp.status_code == 200:
@@ -62,7 +75,12 @@ def register( commands, name = 'None', secretId = 'None' ):
         print( 'No client info found, requesting new id from the web server...')
 
     # Start session and get csrf token
-    client = requests.session()
+    try:
+        client = requests.session()
+    except ConnectionError:
+        print( 'Connection failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
+        time.sleep( failTimeout )
+        return False
     csrf = client.get( urlRegister ).cookies[ 'csrftoken' ]
 
     # Construct package
@@ -75,7 +93,12 @@ def register( commands, name = 'None', secretId = 'None' ):
     headers = { 'X-CSRFToken': csrf }
 
     # Send post and retrieve response
-    resp = client.post( urlRegister, data = payload, headers = headers, timeout = timeout )
+    try:
+        resp = client.post( urlRegister, data = payload, headers = headers, timeout = timeout )
+    except ConnectionError:
+        print( 'Post failed. Waiting ' + str( failTimeout ) + ' seconds before continuing...' )
+        time.sleep( failTimeout )
+        return False
 
     # Handle response
     if resp.status_code == 200:

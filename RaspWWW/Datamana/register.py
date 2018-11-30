@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from Datamana.models import Client, Command, Datapoint
+from Datamana.syntax_check import syntax_check
 import json, random, string
 
 # Options
@@ -24,8 +25,9 @@ def index( request ):
             return response
 
         # Syntax check
-        if syntax_check(payload) == False:
-            response = HttpResponse( 'Syntax Incorrect. name(str, 3-30 char) secretId(str, 10 char) commands(array of str, 3-30 char)' )
+        passed, msg = syntax_check( payload )
+        if passed == False:
+            response = HttpResponse( msg )
             response.status_code = 400
             return response
 
@@ -82,33 +84,3 @@ def index( request ):
         return HttpResponse( response )
 
     return HttpResponse( "Get Csrf Tokens here!" )
-
-# Syntax check returns True if passed and False if failed
-def syntax_check( data ):
-    try:
-        name = data[ 'name' ]
-        secretId = data[ 'secretId' ]
-        commands = data[ 'commands' ]
-    except KeyError:
-        return False
-
-    checks = 0
-
-    if isinstance( name, str ):
-        if len( name ) < 31 and len( name ) > 2:
-            checks += 1
-
-    if isinstance( secretId, str ):
-        if len( secretId ) == 10 or secretId == 'None':
-            checks += 1
-
-    passed = True
-    for command in commands:
-        if isinstance( command, str ):
-            if len( command ) < 31 and len( command ) > 2:
-                checks += 1
-    checks -= len(commands) - 1
-
-    if checks == 3:
-        return True
-    return False

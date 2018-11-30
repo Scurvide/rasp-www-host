@@ -4,6 +4,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from Datamana.models import Client, Command, Datapoint
+from Datamana.syntax_check import syntax_check
 import json
 
 #@csrf_exempt
@@ -22,8 +23,9 @@ def index( request ):
             return response
 
         # Syntax check
-        if syntax_check(payload) == False:
-            response = HttpResponse( 'Syntax Incorrect. name(str, 3-30 char) secretId(str, 10 char) command(str, 3-30 char) point(int or float, <11 char)' )
+        passed, msg = syntax_check( payload )
+        if passed == False:
+            response = HttpResponse( msg )
             response.status_code = 400
             return response
 
@@ -31,6 +33,7 @@ def index( request ):
         secretId = payload[ 'secretId' ]
         command = payload[ 'command' ]
         point = payload[ 'point' ]
+        unit = payload[ 'unit' ]
 
         # Check if client id exists
         try:
@@ -49,7 +52,7 @@ def index( request ):
             response.status_code = 400
             return response
 
-        data = Datapoint.objects.create( client = client, command = com, point = point )
+        data = Datapoint.objects.create( client = client, command = com, point = point, unit = unit )
 
         # Construct response with current command for operation
         response = json.dumps({
@@ -60,41 +63,8 @@ def index( request ):
             ') Data type('
             + com.name +
             ') Point('
-            + str(data.point) + ')'
+            + str(data.point) + data.unit + ')'
             })
         return HttpResponse( response )
 
     return HttpResponse( "Get Csrf Tokens here!" )
-
-
-# Syntax check returns True if passed and False if failed
-def syntax_check( data ):
-    try:
-        name = data[ 'name' ]
-        secretId = data[ 'secretId' ]
-        command = data[ 'command' ]
-        point = data[ 'point' ]
-    except KeyError:
-        return False
-
-    checks = 0
-
-    if isinstance( name, str ):
-        if len( name ) < 31 and len( name ) > 2:
-            checks += 1
-
-    if isinstance( secretId, str ):
-        if len( secretId ) == 10:
-            checks += 1
-
-    if isinstance( command, str ):
-        if len( command ) < 31 and len( command ) > 2:
-            checks += 1
-
-    if isinstance( point, int ) or isinstance( point, float ):
-        if len( str( point ) ) <= 10:
-            checks += 1
-
-    if checks == 4:
-        return True
-    return False

@@ -1,0 +1,14 @@
+{% for com in data %}
+  <table class = 'dataTable'>
+    <tr>
+      <th>{{ com.0.command.name }}</th>
+      <th>Time</th>
+    </tr>
+      {% for point in com %}
+      <tr>
+        <td>{{ point.point }}{{ point.unit }}</td>
+        <td>{{ point.datetime }}</td>
+      </tr>
+      {% endfor %}
+  </table>
+{% endfor %}

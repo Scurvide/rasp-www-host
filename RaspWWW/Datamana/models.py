@@ -13,4 +13,5 @@ class Datapoint( models.Model ):
     client = models.ForeignKey( Client, on_delete = models.CASCADE )
     command = models.ForeignKey( Command, on_delete = models.CASCADE )
     point = models.DecimalField( max_digits = 10, decimal_places = 2 )
+    unit = models.CharField( max_length = 5 )
     datetime = models.DateTimeField( auto_now_add = True )

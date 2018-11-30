@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h4>Delete clients</h4>
+
+{% for client in clients %}
+
+<div id = 'clients' style = 'margin-bottom: 10px'>
+  <a id = '{{ client.name }}Client' href = '{{ client.name }}' class = 'button'>
+    {{ client.name }}
+  </a>
+</div>
+
+{% endfor %}
+
+{% endblock content %}

@@ -1,23 +1,41 @@
-<!DOCTYPE html>
+{% extends 'base.html' %}
+{% load staticfiles %}
 
-<html>
-  <head>
-    <title>Command</title>
+{% block content %}
 
-  </head>
-  <body>
+  <!-- JS -->
+  <script src = "{% static 'js/command.js' %}"></script>
 
-    {% for client in clients %}
-    <div>
-      <h3>{{ client.name }}</h3>
-      <p>{{ client.current_command }}</p>
-      {% for command in client.command_set.all %}
-      <form action = '/command/{{ client.name }}/{{ command.name }}'>
-        <input type = 'submit' value = '{{ command.name }}'></input>
-      </form>
-      {% endfor %}
+  <h4>Client commands</h4>
+
+  {% for client in clients %}
+    <div id = 'commands' class = 'commandsDiv' style = 'margin-bottom: 10px'>
+
+      <table id = '{{ client.name }}CommandsTable'>
+        <tr>
+          <th class = 'td'>{{ client.name }}</th>
+        </tr>
+
+        {% for command in client.command_set.all %}
+
+        <tr>
+          <td>
+            <a id = '{{ client.name }}{{ command.name }}Button' href = '/command/{{ client.name }}/{{ command.name }}' class = 'button'>
+              {{ command.name }}
+            </a>
+          </td>
+        </tr>
+
+        {% endfor %}
+
+      </table>
     </div>
-    {% endfor %}
 
-  </body>
-</html>
+    <script type='text/javascript'>
+        var address = '{{ client.name }}{{ client.current_command }}' + 'Button';
+        $( '#' + address ).css('background-color', 'grey')
+    </script>
+
+  {% endfor %}
+
+{% endblock content %}

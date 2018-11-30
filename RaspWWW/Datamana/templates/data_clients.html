@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+  <!-- JS -->
+  <script src = "{% static 'js/data_clients.js' %}"></script>
+
+  <h4>Client data</h4>
+
+  {% for client in clients %}
+
+  <div id = 'clients' style = 'margin-bottom: 10px'>
+    <a id = '{{ client.name }}Client' href = '{{ client.name }}' class = 'button'>
+      {{ client.name }}
+    </a>
+  </div>
+
+  {% endfor %}
+
+  <div id = 'dataBox'>
+  </div>
+
+{% endblock content %}

@@ -1,21 +1,23 @@
 from ard_comms import *
 from web_comms import *
-import time, threading
+import time, threading, os
 
 # Options
+deleteDataOnBoot    = True        # Reset device to register again on boot
 name = 'Mog'                      # Desired device name (if available)
 commands = [                      # Commands for this device
+    'stop',
     'distance',
-    'tally',
-    'stop'
+    'tally'
     ]
-commandRefreshTime  = 5           # (Seconds) Time interval for rechecking commands from online server
+commandRefreshTime  = 3           # (Seconds) Time interval for rechecking commands from online server
 mainLoopInterval    = 1           # (Seconds) Time interval for mainLoop
-sleepAfterDistance  = 2           # (Seconds) Sleep after distance measurement
+sleepAfterDistance  = 1           # (Seconds) Sleep after distance measurement
 
 # Variables
 command = ''
 data = 0
+unit = ''
 
 def registration():
     res = register( commands, name )
@@ -42,9 +44,9 @@ def mainLoop( lastRefresh = time.time() ):
     command = getCommand()
 
     if command == 'distance':
-        data = getDistance()
+        data, unit = getDistance()
         if data != False:
-            if not postData( data ):
+            if not postData( data, unit ):
                 print( 'Data could not be saved' )
         print( '---------------------------------' )
         time.sleep( sleepAfterDistance )
@@ -63,12 +65,16 @@ def mainLoop( lastRefresh = time.time() ):
     threading.Timer(mainLoopInterval, mainLoop, [lastRefresh]).start()
 
 def initialization():
+    if deleteDataOnBoot == True:
+        os.remove('client_info.json')
+        print( 'Client info deleted ')
+        print( '---------------------------------' )
     if registration():
         print( 'Connection established' )
         print( '---------------------------------' )
         mainLoop()
     else:
-        print( 'Could not register with online server. Retrying in 5 seconds...' )
+        print( 'Could not register/connect with online server. Retrying in 5 seconds...' )
         print( '---------------------------------' )
         time.sleep( 5 )
         initialization()
