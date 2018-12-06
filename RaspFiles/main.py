@@ -10,6 +10,8 @@ commands = [                      # Commands for this device
     'distance',
     'tally'
     ]
+# Client info storage location
+clientInfoFile  = '/home/pi/DataCollection/RaspFiles/client_info.json'
 commandRefreshTime  = 3           # (Seconds) Time interval for rechecking commands from online server
 mainLoopInterval    = 1           # (Seconds) Time interval for mainLoop
 sleepAfterDistance  = 1           # (Seconds) Sleep after distance measurement
@@ -20,21 +22,21 @@ data = 0
 unit = ''
 
 def registration():
-    res = register( commands, name )
+    res = register( clientInfoFile, commands, name )
     if res == True:
         return True
     elif res == 'Reset':
-        with open('client_info.json') as client_info:
+        with open( clientInfoFile ) as client_info:
             info = json.load(client_info)
         info['name'] = name
         info['secretId'] = 'None'
-        with open('client_info.json', 'w') as client_info:
+        with open( clientInfoFile, 'w') as client_info:
             json.dump( info, client_info )
         print( 'Client info reset to request new Id on next try' )
     return False
 
 def getCommand():
-    with open('client_info.json') as client_info:
+    with open( clientInfoFile ) as client_info:
         file = json.load(client_info)
     return file[ 'command' ]
 
@@ -54,7 +56,7 @@ def mainLoop( lastRefresh = time.time() ):
     if command == 'distance':
         data, unit = getDistance()
         if data != False:
-            if not postData( data, unit ):
+            if not postData( clientInfoFile, data, unit ):
                 print( 'Data could not be saved' )
         print( '---------------------------------' )
         time.sleep( sleepAfterDistance )
@@ -62,7 +64,7 @@ def mainLoop( lastRefresh = time.time() ):
     if command == 'tally':
         data = tally()
         if data != False:
-            if not postData( data ):
+            if not postData( clientInfoFile, data ):
                 print( 'Data could not be saved' )
             print( '---------------------------------' )
         else:
@@ -74,7 +76,7 @@ def mainLoop( lastRefresh = time.time() ):
 
 def initialization():
     if deleteDataOnBoot == True:
-        os.remove('client_info.json')
+        os.remove( clientInfoFile )
         print( ' ' )
         print( 'Client info deleted ')
         print( '---------------------------------' )

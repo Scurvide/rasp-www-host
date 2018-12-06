@@ -6,7 +6,7 @@ async def request_command():
             'ws://192.168.1.107:8000' ) as websocket:
         name = 'Mog'
         await websocket.send(name)
-        
+
         command = await websocket.recv()
         print(f'< {command}')
 

@@ -2,16 +2,20 @@ from requests.exceptions import ConnectionError
 import json, time, requests
 
 # Options
-urlSend     = 'http://192.168.1.107:8000/send/'      # Url for sending data
-urlRegister = 'http://192.168.1.107:8000/register/'  # Url for registering device
+urlSend     = 'http://raspdatahost.herokuapp.com/send/'      # Url for sending data
+urlRegister = 'http://raspdatahost.herokuapp.com/register/'  # Url for registering device
+""" For internal testing
+urlSend     = 'http://192.168.1.107:8000/send/'
+urlRegister = 'http://192.168.1.107:8000/register/'
+"""
 timeout     = 5                                      # Request timeout (seconds)
 failTimeout = 2                                      # Timeout if connection fails
 
-def postData( data, unit = '' ):
+def postData( clientInfoFile, data, unit = '' ):
 
     # Try to get client info from file
     try:
-        with open('client_info.json') as client_info:
+        with open( clientInfoFile ) as client_info:
             file = json.load(client_info)
     except:
         print( 'No client info found' )
@@ -53,7 +57,7 @@ def postData( data, unit = '' ):
         # Save possible new command
         if content[ 'command' ] != file[ 'command' ]:
             file[ 'command' ] = content[ 'command' ]
-            with open('client_info.json', 'w') as client_info:
+            with open( clientInfoFile, 'w' ) as client_info:
                 json.dump( file, client_info )
             print ( 'New command received: ' + file[ 'command' ] )
         return True
@@ -62,11 +66,11 @@ def postData( data, unit = '' ):
         return False
 
 
-def register( commands, name = 'None', secretId = 'None' ):
+def register( clientInfoFile, commands, name = 'None', secretId = 'None' ):
 
     # Check if existing client info can be found
     try:
-        with open('client_info.json') as client_info:
+        with open( clientInfoFile ) as client_info:
             file = json.load(client_info)
         if 'name' in file and 'secretId' in file:
             name = file[ 'name' ]
@@ -113,7 +117,7 @@ def register( commands, name = 'None', secretId = 'None' ):
     # Check that data exists and save it
     if 'name' in content and 'secretId' in content and 'command' in content:
         if content[ 'name' ] != '' and content[ 'secretId' ] != '' and content[ 'command' ] != '':
-            with open('client_info.json', 'w') as client_info:
+            with open( clientInfoFile, 'w') as client_info:
                 json.dump( content, client_info )
             print( 'Client info update successful' )
             print( 'Current command: ' + content[ 'command' ] )

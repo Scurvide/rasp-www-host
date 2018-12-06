@@ -1,7 +1,7 @@
 .git
 ArduinoFiles
 Datamana
-RaspFiles/web_sockets.py
+web_sockets.py
 RaspWWW
 .ftpconfig
 .ftpignore
@@ -9,5 +9,5 @@ RaspWWW
 db.sqlite3
 Procfile
 README.md
-requirements.txt
 manage.py
+requirements.txt
