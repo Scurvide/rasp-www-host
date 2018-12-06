@@ -1,0 +1,11 @@
+RaspWWW
+Datamana
+ArduinoFiles
+README.md
+RaspFiles/web_sockets.py
+requirements.txt
+Procfile
+.git
+.gitignore
+.ftpconfig
+.ftpignore
