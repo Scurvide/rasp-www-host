@@ -128,7 +128,4 @@ if "DYNO" in os.environ:
     import dj_database_url
     DATABASES["default"] = dj_database_url.config()
     DEBUG = False
-    ALLOWED_HOSTS = [
-        'http://raspdatahost.herokuapp.com',
-        'https://raspdatahost.herokuapp.com'
-        ]
+    ALLOWED_HOSTS = ['*']
