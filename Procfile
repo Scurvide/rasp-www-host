@@ -1,2 +1,2 @@
-release: python RaspWWW/manage.py migrate
-web: gunicorn RaspWWW.RaspWWW.wsgi.application --log-file -
+release: python manage.py migrate
+web: gunicorn RaspWWW.wsgi:application --log-file -
