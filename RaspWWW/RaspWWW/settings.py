@@ -15,7 +15,6 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
@@ -27,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '192.168.1.107',
-    #'89.27.81.153',
+    '*',
 ]
 
 # Application definition
@@ -120,3 +119,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.9/howto/static-files/
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+if "DYNO" in os.environ:
+    import dj_database_url
+    DATABASES["default"] = dj_database_url.config()
+    DEBUG = False
+    ALLOWED_HOSTS = ['*']
