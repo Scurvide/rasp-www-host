@@ -21,7 +21,7 @@ def client_data( request, client ):
     for com in commands:
         if com.name == 'stop':
             continue
-        data.append( allDataPoints.filter( command = com ).order_by('-datetime')[:20][::-1] )
+        data.append( allDataPoints.filter( command = com ).order_by('-datetime')[:20] )
 
     context = {
         'data': data
