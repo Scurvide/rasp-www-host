@@ -36,6 +36,7 @@ function charter( dataTable, dataType, dataUnit ) {
   let chart = [];
   let autoScaling = true;
   let graph = true;
+
   if ( dataTable != {} && graph) {
 
     if ( dataType === 'distance' ) {
@@ -302,7 +303,6 @@ function charter( dataTable, dataType, dataUnit ) {
         dataTable[n].y = dataTable[n].y / scale;
         dataTable[n].y = dataTable[n].y.toFixed();
       }
-      console.log( 'Scale set to: ' + scale );
       return scale;
     }
     else if ( max - min > 50) {
@@ -311,7 +311,6 @@ function charter( dataTable, dataType, dataUnit ) {
         dataTable[n].y = dataTable[n].y / scale;
         dataTable[n].y = dataTable[n].y.toFixed();
       }
-      console.log( 'Scale set to: ' + scale );
       return scale;
     }
     else if ( max - min > 20) {
@@ -320,7 +319,6 @@ function charter( dataTable, dataType, dataUnit ) {
         dataTable[n].y = dataTable[n].y / scale;
         dataTable[n].y = dataTable[n].y.toFixed();
       }
-      console.log( 'Scale set to: ' + scale );
       return scale;
     }
     return scale;
