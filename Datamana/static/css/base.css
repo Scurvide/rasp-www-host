@@ -17,8 +17,18 @@ text-decoration: none;
   outline: 0;
 }
 
-.commandsDiv, .dataTable, #clients {
+.commandsDiv, .dataTable, #clients, .chartTable {
   vertical-align: top;
   position: relative;
   display: inline-block;
+}
+
+
+.chartTable {
+  margin-top: 20px;
+  border-collapse: collapse;
+}
+.chartTable td {
+  width: 25px;
+  height: 5px;
 }

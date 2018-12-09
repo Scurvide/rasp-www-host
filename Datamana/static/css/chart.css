@@ -1,0 +1,23 @@
+
+.dataCell, .dataCellBar {
+  font-size: 8px;
+}
+.dataCellBar {
+  background-color: black;
+}
+
+.y-axel {
+  border-right: solid 2px black;
+  padding-right: 5px;
+  text-align: right;
+}
+.x-axel {
+  border-top: solid 2px black;
+  padding-top: 3px;
+}
+#xFirst {
+  text-align: left;
+}
+#xLast {
+  text-align: right;
+}

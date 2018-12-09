@@ -1,14 +1,36 @@
+{% load staticfiles %}
+
+<script>
+  var dataTypes = [];
+  var dataUnits = [];
+  var dataTables = [];
+</script>
+
 {% for com in data %}
+
+  <!-- CSS -->
+  <link rel = 'stylesheet' href = "{% static 'css/chart.css' %}">
+
+  <script>
+    dataTypes.push('{{ com.0.command.name }}');
+    dataUnits.push('{{ com.0.unit }}');
+    dataTables.push([]);
+    {% for point in com %}
+      dataTables[dataTables.length - 1].push( {x: new Date( '{{point.datetime.timestamp}}'*1000 ), y: '{{point.point}}'} );
+    {% endfor %}
+  </script>
+
   <table class = 'dataTable'>
     <tr>
-      <th>{{ com.0.command.name }}</th>
+      <th>Value</th>
       <th>Time</th>
     </tr>
       {% for point in com %}
       <tr>
-        <td>{{ point.point }}{{ point.unit }}</td>
+        <td style = "padding-right: 10px">{{ point.point }}{{ point.unit }}</td>
         <td>{{ point.datetime }}</td>
       </tr>
       {% endfor %}
   </table>
+
 {% endfor %}
