@@ -8,9 +8,6 @@
 
 {% for com in data %}
 
-  <!-- CSS -->
-  <link rel = 'stylesheet' href = "{% static 'css/chart.css' %}">
-
   <script>
     dataTypes.push('{{ com.0.command.name }}');
     dataUnits.push('{{ com.0.unit }}');
@@ -19,18 +16,5 @@
       dataTables[dataTables.length - 1].push( {x: new Date( '{{point.datetime.timestamp}}'*1000 ), y: '{{point.point}}'} );
     {% endfor %}
   </script>
-  <!--
-  <table class = 'dataTable'>
-    <tr>
-      <th>Value</th>
-      <th>Time</th>
-    </tr>
-      {% for point in com %}
-      <tr>
-        <td style = "padding-right: 10px">{{ point.point }}{{ point.unit }}</td>
-        <td>{{ point.datetime }}</td>
-      </tr>
-      {% endfor %}
-  </table>
-  -->
+  
 {% endfor %}

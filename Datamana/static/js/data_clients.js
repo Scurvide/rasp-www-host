@@ -3,6 +3,7 @@ $(function() {
   "use strict";
 
   var rurl = '';
+  $('.chartTable').append("<link rel='stylesheet' type='text/css' href=" + chartCSS + ">");
 
   $( '#clients a' ).on( 'click', function(event) {
 
