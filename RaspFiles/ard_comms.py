@@ -12,8 +12,8 @@ ard = serial.Serial( usbDevice, serialPort, timeout = timeout )
 # Time needed for Arduino to reset and populate value array
 time.sleep( 2 )
 
-# Returns sensor output or False if data collection failed
-def getDistance():
+# Returns sensor output and unit or False if data collection failed
+def getMeasurement():
 
     # Flush input buffer
     ard.reset_input_buffer()
@@ -23,19 +23,28 @@ def getDistance():
     # Read response from Arduino
     output = ''
     output = ard.readline()
+
     if output != '' and output != b'':
-        try:
-            output = float(output)
-        except ValueError:
-            print( 'Arduino overflow buffer error. Continuing...' )
-            return False, ''
-        # Check if no data of value was received
-        if output > 0:
-            output = output / 100
-            unit = 'm'
-            print( 'Distance: ' + str(output) + unit )
-            return output, unit
-    print( 'Failed to receive distance data' )
+        # Measurement value and unit are separated by ';' in serial line
+        # endline == '\r\n' which is removed with .splitlines()
+        output = output.splitlines()
+        serialData = output[0].split(';')
+
+        if len( serialData ) == 1 or len( serialData ) == 2:
+            try:
+                value = int( serialData[0] )
+            except ValueError:
+                print( 'Measurement value not integer' )
+                return False
+            unit = ''
+            if len( serialData ) == 2:
+                unit = serialData[1]
+            # Check if value received is more than 0
+            if value > 0:
+                print( 'Measured value: ' + str(value) + unit )
+                return value, unit
+
+    print( 'Failed to receive measurement data' )
     return False, ''
 
 # Returns True if something goes past
@@ -54,7 +63,7 @@ def tally():
                 output = float(output)
             except ValueError:
                 print( 'Arduino overflow buffer error. Continuing...' )
-                return False, ''
+                return False
             if output == 1:
                 print( 'Something went past' )
                 return output

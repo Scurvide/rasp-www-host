@@ -2,12 +2,12 @@ from requests.exceptions import ConnectionError
 import json, time, requests
 
 # Options
-urlSend     = 'http://raspdatahost.herokuapp.com/send/'      # Url for sending data
-urlRegister = 'http://raspdatahost.herokuapp.com/register/'  # Url for registering device
-""" For internal testing
+#urlSend     = 'http://raspdatahost.herokuapp.com/send/'      # Url for sending data
+#urlRegister = 'http://raspdatahost.herokuapp.com/register/'  # Url for registering device
+# For internal testing
 urlSend     = 'http://192.168.1.107:8000/send/'
 urlRegister = 'http://192.168.1.107:8000/register/'
-"""
+
 timeout     = 5                                      # Request timeout (seconds)
 failTimeout = 2                                      # Timeout if connection fails
 
@@ -32,7 +32,6 @@ def postData( clientInfoFile, data, unit = '' ):
 
     # Construct package
     payload = {
-        'name': file[ 'name' ],
         'secretId': file[ 'secretId' ],
         'command': file[ 'command' ],
         'point': data,
@@ -66,14 +65,13 @@ def postData( clientInfoFile, data, unit = '' ):
         return False
 
 
-def register( clientInfoFile, commands, name = 'None', secretId = 'None' ):
+def register( clientInfoFile, commands, secretId = 'None' ):
 
     # Check if existing client info can be found
     try:
         with open( clientInfoFile ) as client_info:
             file = json.load(client_info)
-        if 'name' in file and 'secretId' in file:
-            name = file[ 'name' ]
+        if 'secretId' in file:
             secretId = file[ 'secretId' ]
     except:
         print( 'No client info found, requesting new id from the web server...')
@@ -89,7 +87,6 @@ def register( clientInfoFile, commands, name = 'None', secretId = 'None' ):
 
     # Construct package
     payload = {
-        'name': name,
         'secretId': secretId,
         'commands': commands
         }
@@ -107,20 +104,18 @@ def register( clientInfoFile, commands, name = 'None', secretId = 'None' ):
     # Handle response
     if resp.status_code == 200:
         content = json.loads(resp.content)
+        # Save received info to file
+        with open( clientInfoFile, 'w') as client_info:
+            json.dump( content, client_info )
+        print( 'Client info update successful' )
+        print( 'Client name: ' + content[ 'name' ] )
+        print( 'Current command: ' + content[ 'command' ] )
+        return True
+
     elif resp.status_code == 406:
         print( resp.content )
         return 'Reset'
+
     else:
         print( resp.content )
         return False
-
-    # Check that data exists and save it
-    if 'name' in content and 'secretId' in content and 'command' in content:
-        if content[ 'name' ] != '' and content[ 'secretId' ] != '' and content[ 'command' ] != '':
-            with open( clientInfoFile, 'w') as client_info:
-                json.dump( content, client_info )
-            print( 'Client info update successful' )
-            print( 'Current command: ' + content[ 'command' ] )
-            return True
-    print( 'Client info update unsuccessful' )
-    return False

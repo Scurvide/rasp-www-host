@@ -1,9 +1,13 @@
+/*
+Changes selected buttons color to grey
+*/
+
 $(function() {
   "use strict";
 
-  var path = window.location.pathname;
+  let path = window.location.pathname;
   path = path.split( '/' );
-  var current = path[1];
+  let current = path[1];
 
   $( '#links a' ).css('background-color', 'black')
   $( '#' + current + 'Link' ).css('background-color', 'grey')

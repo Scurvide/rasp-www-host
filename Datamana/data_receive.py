@@ -1,13 +1,15 @@
-from django.shortcuts import render
 from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
-from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from Datamana.models import Client, Command, Datapoint
 from Datamana.syntax_check import syntax_check
 import json
 
-#@csrf_exempt
+# Receives data from clients via POST messages
+# and stores it to database. Responds to client with
+# saved data points information.
+# Data in POST messages should be in json format.
+
 @ensure_csrf_cookie
 def index( request ):
 
@@ -29,7 +31,6 @@ def index( request ):
             response.status_code = 400
             return response
 
-        name = payload[ 'name' ]
         secretId = payload[ 'secretId' ]
         command = payload[ 'command' ]
         point = payload[ 'point' ]
@@ -52,7 +53,12 @@ def index( request ):
             response.status_code = 400
             return response
 
+        # Create new data point
         data = Datapoint.objects.create( client = client, command = com, point = point, unit = unit )
+
+        # If measurement was command set it to stop
+        #if command == 'measurement':
+        #    client.current_command = 'stop'
 
         # Construct response with current command for operation
         response = json.dumps({

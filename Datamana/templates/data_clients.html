@@ -1,15 +1,14 @@
+<!-- Rendered by data_view.py -->
+
 {% extends 'base.html' %}
 {% load staticfiles %}
 
 {% block content %}
 
-  <!-- CSS -->
+  <!-- CSS for charts -->
   <script>
     var chartCSS = "{% static 'css/chart.css' %}"
   </script>
-  <!--
-  <link rel = 'stylesheet' href = "{% static 'css/chart.css' %}">
-  -->
   <!-- JS -->
   <script src = "{% static 'js/data_clients.js' %}"></script>
 
@@ -29,7 +28,7 @@
   </div>
 
   <div>
-    <table id = 'chartTableDistance' class = 'chartTable'>
+    <table id = 'chartTableMeasurement' class = 'chartTable'>
     </table>
     <table id = 'chartTableTally' class = 'chartTable'>
     </table>

@@ -1,9 +1,8 @@
 from django.http import HttpResponse, HttpRequest
 from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
 from Datamana.models import Client, Command
-import json
 
+# Gets commands for clients
 def index( request ):
 
     context = {
@@ -11,6 +10,7 @@ def index( request ):
     }
     return render( request, 'command.html', context )
 
+# Sets command for client in database
 def command( request, client, command ):
 
     cli = Client.objects.get( name = client )

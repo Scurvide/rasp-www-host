@@ -1,4 +1,6 @@
-
+/*
+CSS style for data chart cells
+*/
 .dataCell, .dataCellBar {
   font-size: 8px;
 }

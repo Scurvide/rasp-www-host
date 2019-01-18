@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpRequest
 from Datamana.models import Client
 
+# Deletes client and all related data from database
 
 def index( request ):
 

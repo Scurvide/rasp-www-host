@@ -1,10 +1,20 @@
 from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
-from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.views.decorators.csrf import ensure_csrf_cookie
 from Datamana.models import Client, Command, Datapoint
 from Datamana.syntax_check import syntax_check
 import json, random, string
+
+# Registering is done by sending a POST message that includes
+# desired name, secretId as None and list of commands client can use.
+# Generates clients random name (if necessary) and secretId,
+# which is used to identify the client when it sends data to server.
+# Registering new commands is done by sending a POST message that
+# includes name, secretId, and new list of commands.
+# Responds to client with client info that the client should
+# include with any future POST messages to server.
+# Data in POST messages should be in json format.
 
 # Options
 randomNameLen   = 5     # Random placeholder name length
@@ -32,16 +42,15 @@ def index( request ):
             return response
 
         secretId = payload[ 'secretId' ]
-        name = payload[ 'name' ]
         commands = payload[ 'commands' ]
 
         # Check if secretId and name exists. If not, create randoms
         if secretId == 'None':
-            # Create random secretId
+            # Create random secretId and name
             secretId = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(secretIdLen))
-            if name == 'None':
-                # Create name
-                name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
+            name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
+            # Try to create a new client object until both secretId and name
+            # are unique
             success = False
             while success == False:
             # Create new client object
@@ -50,20 +59,14 @@ def index( request ):
                     success = True
                 except IntegrityError:
                     # Name or id needs to be unique
-                    name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
                     secretId = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(secretIdLen))
+                    name = ''.join(random.choice(string.ascii_letters) for _ in range(randomNameLen))
         else:
             try:
                 client = Client.objects.get( secretId = secretId )
             except ObjectDoesNotExist:
-                response = HttpResponse( 'Secret Id not valid, use None to assign new Id' )
+                response = HttpResponse( 'Secret Id not valid, delete client info file to assign new Id' )
                 response.status_code = 406
-                return response
-            try:
-                client.name = name
-            except IntegrityError:
-                response = HttpResponse( 'Name already in use' )
-                response.status_code = 400
                 return response
 
         # Create commands if needed
@@ -77,8 +80,8 @@ def index( request ):
 
         # Returns client info and first listed command as command
         response = json.dumps({
-            'name': client.name,
             'secretId': client.secretId,
+            'name': client.name,
             'command': client.current_command
             })
         return HttpResponse( response )

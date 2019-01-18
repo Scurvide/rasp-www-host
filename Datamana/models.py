@@ -1,5 +1,7 @@
 from django.db import models
 
+# Models used for database
+
 class Client( models.Model ):
     name = models.CharField( max_length = 30, unique = True )
     secretId = models.CharField( max_length = 30, unique = True )

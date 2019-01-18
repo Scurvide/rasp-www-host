@@ -1,28 +1,42 @@
+/*
+When selecting client to see the data of:
+Loads data for related url to #dataBox and calls charter function.
+Charter function generates graphs from datalist generated in #dataBox
+and constructs them to chartTables in html table format.
+Refreshes data from server every refreshTime.
+*/
 
 $(function() {
   "use strict";
 
-  var rurl = '';
+  let refreshTime = 1000; // Refresh time for data reloads from database
+  let rurl = '';
+
+  // CSS style included to chartTables to ensure it is
+  // loaded before a graph is generated
   $('.chartTable').append("<link rel='stylesheet' type='text/css' href=" + chartCSS + ">");
 
+  // Loads data based on selected client
   $( '#clients a' ).on( 'click', function(event) {
-
-      event.preventDefault();
-      rurl = $( this ).attr( 'href' );
-      $( '.chartTable tr' ).remove();
-      $( '#dataBox' ).load( rurl );
-      var splitted = rurl.split( '/' );
-      $( '#clients a' ).css('background-color', 'black');
-      $( '#' + splitted[splitted.length - 1] + 'Client' ).css('background-color', 'grey');
+    event.preventDefault();
+    rurl = $( this ).attr( 'href' );
+    $( '.chartTable tr' ).remove();
+    $( '#dataBox' ).load( rurl );
+    var splitted = rurl.split( '/' );
+    $( '#clients a' ).css('background-color', 'black');
+    $( '#' + splitted[splitted.length - 1] + 'Client' ).css('background-color', 'grey');
   });
 
+  // Refreshes data from database every refreshTime
   function autoRefresh() {
     if (rurl != '') {
       $( '#dataBox' ).load( rurl ).ajaxComplete(charterManager());
     };
   };
-  setInterval(autoRefresh, 1000);
+  setInterval(autoRefresh, refreshTime);
 
+  // dataTables is generated in data.html. It has data required
+  // for generating all graphs for this client.
   function charterManager() {
     for (let u = 0; u < dataTables.length; u++) {
       charter( dataTables[u], dataTypes[u], dataUnits[u] )
@@ -39,8 +53,9 @@ function charter( dataTable, dataType, dataUnit ) {
 
   if ( dataTable != {} && graph) {
 
-    if ( dataType === 'distance' ) {
+    if ( dataType === 'measurement' ) {
 
+      // Convert number strings to floats
       for (let o = 0; o < dataTable.length; o++) {
         dataTable[o].y = parseFloat(dataTable[o].y);
       }
@@ -55,7 +70,6 @@ function charter( dataTable, dataType, dataUnit ) {
       let max = getMaxY();
       let yRange = max - min;
       let xRange = dataTable.length;
-
       // Scaling if necessary
       let scale = 1;
       if (autoScaling == true) {
@@ -66,9 +80,9 @@ function charter( dataTable, dataType, dataUnit ) {
           yRange = max - min;
         }
       }
-
       chart = Array(xRange + 1).fill().map(()=>Array(yRange).fill());
 
+      // Populating matrix with data to form a graph
       for (let n = min; n <= max; n++) {
         chart[0][n - min] = n * scale;
       }
@@ -83,28 +97,35 @@ function charter( dataTable, dataType, dataUnit ) {
         }
       }
 
+      // Chart construction from matrix to html table
       let handler = '#chartTable' + dataType.charAt(0).toUpperCase() + dataType.slice(1);
       let handlerTrLast = handler + ' tr:last';
-      // Chart construction from matrix to html table
+      // Empty the table first
       $( handler + ' tr' ).remove();
+      // Header row with y-axel unit and data type
       $( handler ).append(
         "<tr><th id = 'dataUnit'>(" + dataUnit + ")</th>" +
         "<th id = 'dataType' colspan = '" + xRange + "'>" + dataType.charAt(0).toUpperCase() + dataType.slice(1) + "</th></tr>"
       );
+      // Graph construction
       for (let row = yRange; row >= 0; row--) {
         $( handlerTrLast ).after('<tr></tr>');
         for (let col = 0; col <= xRange; col++) {
+          // Y-axel value indicators
           if ( col === 0 ) {
             $( handlerTrLast ).append("<td class = 'y-axel'>" + chart[col][row] + "</td>");
           }
+          // Data points
           else if ( chart[col][row] != 0 ) {
             $( handlerTrLast ).append("<td class = 'dataCell'>&#9899</td>");
           }
+          // Empty cells in graph
           else {
             $( handlerTrLast ).append("<td class = 'dataCell'></td>");
           }
         }
       }
+      // X-axel time indicators
       let date = dataTable[0].x;
       let dateM = dataTable[xRange - 1].x;
       $( handlerTrLast ).after(
@@ -119,6 +140,7 @@ function charter( dataTable, dataType, dataUnit ) {
 
     else if ( dataType === 'tally' ) {
 
+      // Convert number strings to ints
       for (let o = 0; o < dataTable.length; o++) {
         dataTable[o].y = parseInt(dataTable[o].y);
       }
@@ -132,7 +154,6 @@ function charter( dataTable, dataType, dataUnit ) {
       let max = getMaxY();
       let yRange = max;
       let xRange = dataTable.length;
-
       // Scaling if necessary
       let scale = 1;
       if (autoScaling == true) {
@@ -142,9 +163,9 @@ function charter( dataTable, dataType, dataUnit ) {
           yRange = max;
         }
       }
-
       chart = Array(xRange + 1).fill().map(()=>Array(yRange).fill());
 
+      // Populating matrix with data to form a graph
       for (let n = 0; n < max; n++) {
         chart[0][n] = (n + 1) * scale;
       }
@@ -165,26 +186,32 @@ function charter( dataTable, dataType, dataUnit ) {
       // Chart construction from matrix to html table
       let handler = '#chartTable' + dataType.charAt(0).toUpperCase() + dataType.slice(1);
       let handlerTrLast = handler + ' tr:last';
-
+      // Empty the table first
       $( handler + ' tr' ).remove();
+      // Header row with y-axel unit and data type
       $( handler ).append(
         "<tr><th id = 'dataUnit'></th>" +
         "<th id = 'dataType' colspan = '" + xRange + "'>" + dataType.charAt(0).toUpperCase() + dataType.slice(1) + "</th></tr>"
       );
+      // Graph construction
       for (let row = yRange - 1; row >= 0; row--) {
         $( handlerTrLast ).after('<tr></tr>');
         for (let col = 0; col <= xRange; col++) {
+          // Y-axel value indicators
           if ( col === 0 ) {
             $( handlerTrLast ).append("<td class = 'y-axel'>" + chart[col][row] + "</td>");
           }
+          // Data points
           else if ( chart[col][row] != 0 ) {
             $( handlerTrLast ).append("<td class = 'dataCellBar'></td>");
           }
+          // Empty cells in graph
           else {
             $( handlerTrLast ).append("<td class = 'dataCell'></td>");
           }
         }
       }
+      // X-axel time indicators and time unit
       $( handlerTrLast ).after("<tr><td></td></tr>");
       for (let col = 0; col < xRange; col++) {
         let time;
@@ -197,11 +224,12 @@ function charter( dataTable, dataType, dataUnit ) {
       }
       $( handlerTrLast ).append("<th>(" + timeUnit + ")</th>");
     }
+    // If dataType is not supported, empty the table
     else {$('#chartTable' + dataType.charAt(0).toUpperCase() + dataType.slice(1) + 'tr').remove();}
 
   }
 
-  // Functions for finding min and max data point
+  // Functions for finding min and max data point from dataTable
   function getYs(){
     return dataTable.map(d => d.y);
   }
@@ -212,7 +240,8 @@ function charter( dataTable, dataType, dataUnit ) {
     return Math.max(...getYs());
   }
 
-  // Unit conversion by multiplying with 100 if data has decimals
+  // Unit conversion from m to cm (in this case)
+  // by multiplying with 100 if data has decimals
   function unitConversion () {
     for (let n = 0; n < dataTable.length; n++) {
       if (dataTable[n].y % 1 != 0) {
@@ -226,7 +255,7 @@ function charter( dataTable, dataType, dataUnit ) {
     return false;
   }
 
-  // Time unit and range for bar chart
+  // Time unit and range finder for bar chart
   function getTimeUnit( dataTable ) {
     let year = false, month = false, day = false, hour = false, minute = false;
     let timeDifference = dataTable[dataTable.length-1].x.getTime() - dataTable[0].x.getTime();
@@ -237,10 +266,9 @@ function charter( dataTable, dataType, dataUnit ) {
     else { return 'min'; }
   }
 
-  // Add tally values together based on time
+  // Add tally values together based on time and timeUnit
   function barTimeGroup( dataTable, timeUnit ) {
     let len = dataTable.length;
-    let time;
     if ( timeUnit == 'y' ) {
       for (let n = 0; n < len - 1; n++) {
         while (dataTable[n].x.getFullYear() === dataTable[n+1].x.getFullYear()) {
@@ -294,7 +322,8 @@ function charter( dataTable, dataType, dataUnit ) {
     return dataTable;
   }
 
-  // Autoscale function
+  // Autoscale function scales dataTable data and
+  // returns scale based on minimum and maximum values given.
   function autoScale( dataTable, min, max ) {
     let scale = 1;
     if ( max - min > 100) {

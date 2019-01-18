@@ -3,6 +3,8 @@ from django.http import HttpResponse, HttpRequest
 from django.core.exceptions import ObjectDoesNotExist
 from Datamana.models import Client, Command, Datapoint
 
+# Options
+dataPointsShown = 20
 
 def index( request ):
 
@@ -11,6 +13,7 @@ def index( request ):
     }
     return render( request, 'data_clients.html', context )
 
+# Collects client data for viewing
 def client_data( request, client ):
 
     cli = Client.objects.get( name = client )
@@ -21,7 +24,7 @@ def client_data( request, client ):
     for com in commands:
         if com.name == 'stop':
             continue
-        data.append( allDataPoints.filter( command = com ).order_by('-datetime')[:20][::-1] )
+        data.append( allDataPoints.filter( command = com ).order_by('-datetime')[:dataPointsShown][::-1] )
 
     context = {
         'data': data

@@ -1,5 +1,5 @@
 # Eats a dictionary of data and checks each value for
-# requirements based on key
+# requirements set here based on key
 
 def syntax_check( data ):
 

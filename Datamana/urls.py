@@ -1,7 +1,7 @@
 from django.urls import path
-
 from . import data_receive, data_view, register, command, base, delete
 
+# Urls that direct to corresponding view and function.
 urlpatterns = [
     path('', base.index, name = 'base'),
     path('send/', data_receive.index, name = 'send'),

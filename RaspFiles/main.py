@@ -4,10 +4,9 @@ import time, threading, os
 
 # Options
 deleteDataOnBoot    = False       # Reset device to register again on boot
-name = 'Mog'                      # Desired device name (if available)
 commands = [                      # Commands for this device
     'stop',
-    'distance',
+    'measurement',
     'tally'
     ]
 # Client info storage location
@@ -20,20 +19,18 @@ sleepAfterDistance  = 1           # (Seconds) Sleep after distance measurement
 command = ''
 data = 0
 unit = ''
+endProgram = False
 
 def registration():
-    res = register( clientInfoFile, commands, name )
-    if res == True:
-        return True
-    elif res == 'Reset':
-        with open( clientInfoFile ) as client_info:
-            info = json.load(client_info)
-        info['name'] = name
-        info['secretId'] = 'None'
-        with open( clientInfoFile, 'w') as client_info:
-            json.dump( info, client_info )
-        print( 'Client info reset to request new Id on next try' )
-    return False
+    res = register( clientInfoFile, commands )
+    while res != True:
+        if res == 'Reset':
+            os.remove( clientInfoFile )
+            print( 'Client info file deleted to request new Id on next try' )
+            res = register( clientInfoFile, commands )
+        else:
+            return False
+    return True
 
 def getCommand():
     with open( clientInfoFile ) as client_info:
@@ -42,52 +39,52 @@ def getCommand():
 
 def mainLoop( lastRefresh = time.time() ):
 
-    # If time enough check command with web server
-    if time.time() > lastRefresh + commandRefreshTime:
-        print( 'Updating client info from server...' )
-        if registration():
-            lastRefresh = time.time()
-        else:
-            print( 'Command refresh failed' )
-        print( '---------------------------------' )
-
-    command = getCommand()
-
-    if command == 'distance':
-        data, unit = getDistance()
-        if data != False:
-            if not postData( clientInfoFile, data, unit ):
-                print( 'Data could not be saved' )
-        print( '---------------------------------' )
-        time.sleep( sleepAfterDistance )
-
-    if command == 'tally':
-        data = tally()
-        if data != False:
-            if not postData( clientInfoFile, data ):
-                print( 'Data could not be saved' )
-            print( '---------------------------------' )
-        else:
-            print( 'Tally checked' )
+    while endProgram == False:
+        # If time enough check command with web server
+        if time.time() > lastRefresh + commandRefreshTime:
+            print( 'Updating client info from server...' )
+            if registration():
+                lastRefresh = time.time()
+            else:
+                print( 'Command refresh failed' )
             print( '---------------------------------' )
 
+        command = getCommand()
+
+        if command == 'measurement':
+            data, unit = getMeasurement()
+            if data != False:
+                if not postData( clientInfoFile, data, unit ):
+                    print( 'Data could not be saved' )
+            print( '---------------------------------' )
+            time.sleep( sleepAfterDistance )
+
+        if command == 'tally':
+            data = tally()
+            if data != False:
+                if not postData( clientInfoFile, data ):
+                    print( 'Data could not be saved' )
+                print( '---------------------------------' )
+            else:
+                print( 'Tally checked' )
+                print( '---------------------------------' )
+
+        time.sleep(mainLoopInterval)
     # Exceute mainLoop every mainLoopInterval seconds
-    threading.Timer(mainLoopInterval, mainLoop, [lastRefresh]).start()
+    #threading.Timer(mainLoopInterval, mainLoop, [lastRefresh]).start()
 
 def initialization():
     if deleteDataOnBoot == True:
         os.remove( clientInfoFile )
         print( ' ' )
-        print( 'Client info deleted ')
+        print( 'Client info deleted - deleteDataOnBoot option was True')
         print( '---------------------------------' )
-    if registration():
-        print( 'Connection established' )
-        print( '---------------------------------' )
-        mainLoop()
-    else:
-        print( 'Could not register/connect with online server. Retrying in 5 seconds...' )
-        print( '---------------------------------' )
-        time.sleep( 5 )
-        initialization()
+
+    while registration() != True:
+        print( 'Registration to the online server failed. Retrying...' )
+
+    print( 'Connection established' )
+    print( '---------------------------------' )
+    mainLoop()
 
 initialization()
