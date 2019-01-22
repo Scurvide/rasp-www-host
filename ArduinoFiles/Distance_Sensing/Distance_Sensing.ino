@@ -18,20 +18,19 @@ const int led           = 13;   // Led pin
 const int serialPort    = 9600; // Serial port for communication
 const int msgDistance   = '7';  // Message for returning current distance reading
 const int msgTally      = '3';  // Message for returning 1 when something passes by
+const int msgResetTally = '4';  // Message for resetting tally counter
 const int attempts      = 10;   // Reattempts if sonar returns value 0
 const int attemptDelay  = 50;   // Milliseconds. Min 29ms
-const int sample        = 10;   // How many values will be used for tallying
-const int tallyTrigger  = 20;   // Change distance change required for tally trigger (cm)
+const int tallyTrigger  = 30;   // Change distance change required for tally trigger (cm)
 const char unit[]       = "cm"; // Distance measurement unit
 
 // Variables
 int msg                 = 0;
-unsigned int cm         = 0;
+int cm                  = 0;
+int lastDistance        = 0;
 int x                   = 0;
-int average             = 0;
-int total               = 0;
 int tally               = 0;
-unsigned int values[sample];
+int tallyCount          = 0;
 
 void setup() {
     // Serial Port begin
@@ -45,24 +44,17 @@ void loop() {
 
     // Data collection routine
     x = 0;
+    lastDistance = cm;
     cm = 0;
-    total = 0;
     tally = 0;
     while (cm <= 0 && attempts > x) {
         cm = sonar.ping_cm();
         x++;
         delay(attemptDelay);
     }
-    if (average - tallyTrigger > cm) {
+    if (lastDistance - cm > tallyTrigger) {
         tally = 1;
     }
-    for (int i = 0; i < sample - 1; i++) {
-        values[i] = values[i + 1];
-        total = total + values[i];
-    }
-    values[sample - 1] = cm;
-    total = total + cm;
-    average = round(total / sample);
 
     // Serial check for command
     if (Serial.available() > 0) {
@@ -76,11 +68,26 @@ void loop() {
             Serial.println(unit);
             msg = 0;
         }
+        // If command is tally, prints tallyCount to serial
+        if (msg == msgTally) {
+            Serial.println(tallyCount);
+            tallyCount = 0;
+            msg = 0;
+        }
+
+        // If command is clearTally, clears tallyCount
+        if (msg == msgResetTally) {
+            tallyCount = 0;
+            Serial.println(tallyCount);
+            msg = 0;
+        }
     }
 
-    // If command is tally and if tally triggers, prints "1" to serial
-    if (msg == msgTally && tally == 1) {
-        Serial.println(1);
+    // If tally triggers, adds +1 to tallyCount
+    if (tally == 1) {
+        if (tallyCount < 32700) {
+          tallyCount++;
+        }
         digitalWrite(led, HIGH);
         delay(500);
         digitalWrite(led, LOW);

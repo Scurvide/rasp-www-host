@@ -6,10 +6,13 @@ class Client( models.Model ):
     name = models.CharField( max_length = 30, unique = True )
     secretId = models.CharField( max_length = 30, unique = True )
     current_command = models.CharField( max_length = 30 )
+    measure = models.BooleanField( default = False )
+    autoMeasure = models.BooleanField( default = False )
 
 class Command( models.Model ):
     name = models.CharField( max_length = 30, unique = True )
     client = models.ManyToManyField( Client )
+    graphType = models.CharField( max_length = 30 )
 
 class Datapoint( models.Model ):
     client = models.ForeignKey( Client, on_delete = models.CASCADE )

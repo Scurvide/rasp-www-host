@@ -43,6 +43,7 @@ def index( request ):
 
         secretId = payload[ 'secretId' ]
         commands = payload[ 'commands' ]
+        graphTypes = payload[ 'graphTypes' ]
 
         # Check if secretId and name exists. If not, create randoms
         if secretId == 'None':
@@ -70,19 +71,23 @@ def index( request ):
                 return response
 
         # Create commands if needed
+        i = 0
         for command in commands:
             command = command.lower()
             try:
                 com = Command.objects.get( name = command )
             except ObjectDoesNotExist:
-                com = Command.objects.create( name = command )
+                com = Command.objects.create( name = command, graphType = graphTypes[i] )
             com.client.add( client )
+            i += 1
 
         # Returns client info and first listed command as command
         response = json.dumps({
             'secretId': client.secretId,
             'name': client.name,
-            'command': client.current_command
+            'command': client.current_command,
+            'measure': client.measure,
+            'autoMeasure': client.autoMeasure
             })
         return HttpResponse( response )
 

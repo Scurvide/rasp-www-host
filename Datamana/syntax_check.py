@@ -41,6 +41,16 @@ def syntax_check( data ):
                 return False, msg + 'command (str, 3-30 char)'
             continue
 
+        elif key == 'graphTypes':
+            checksRequired += len( value ) - 1
+            for type in value:
+                if isinstance( type, str ):
+                    if len( type ) < 31 and len( type ) > 2:
+                        checks += 1
+                        continue
+                return False, msg + 'graphType (str, 3-30 char)'
+            continue
+
         elif key == 'point':
             if isinstance( value, int ) or isinstance( value, float ):
                 if len( str( value ) ) <= 10:
@@ -54,6 +64,12 @@ def syntax_check( data ):
                     checks += 1
                     continue
             return False, msg + 'unit (str, 0-5 char)'
+
+        elif key == 'measure':
+            if value == True or value == False:
+                checks += 1
+                continue
+            return False, msg + 'measure (True or False)'
 
         return False, msg + 'unsupported key (' + key + ')'
 

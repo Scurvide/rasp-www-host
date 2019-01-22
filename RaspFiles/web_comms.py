@@ -11,7 +11,7 @@ urlRegister = 'http://192.168.1.107:8000/register/'
 timeout     = 5                                      # Request timeout (seconds)
 failTimeout = 2                                      # Timeout if connection fails
 
-def postData( clientInfoFile, data, unit = '' ):
+def postData( clientInfoFile, data, unit, command ):
 
     # Try to get client info from file
     try:
@@ -33,7 +33,8 @@ def postData( clientInfoFile, data, unit = '' ):
     # Construct package
     payload = {
         'secretId': file[ 'secretId' ],
-        'command': file[ 'command' ],
+        'measure': file[ 'measure' ],
+        'command': command,
         'point': data,
         'unit': unit
         }
@@ -51,21 +52,19 @@ def postData( clientInfoFile, data, unit = '' ):
 
     # Handle response
     if resp.status_code == 200:
+        print( 'Datapoint successfully saved to database' )
         content = json.loads(resp.content)
-        print( content[ 'msg' ] )
-        # Save possible new command
-        if content[ 'command' ] != file[ 'command' ]:
-            file[ 'command' ] = content[ 'command' ]
-            with open( clientInfoFile, 'w' ) as client_info:
-                json.dump( file, client_info )
-            print ( 'New command received: ' + file[ 'command' ] )
+        # Update client info
+        with open( clientInfoFile, 'w' ) as client_info:
+            json.dump( content, client_info )
+        print( 'Client info updated' )
         return True
     else:
         print( resp.content )
         return False
 
 
-def register( clientInfoFile, commands, secretId = 'None' ):
+def register( clientInfoFile, commands, graphTypes, secretId = 'None' ):
 
     # Check if existing client info can be found
     try:
@@ -88,7 +87,8 @@ def register( clientInfoFile, commands, secretId = 'None' ):
     # Construct package
     payload = {
         'secretId': secretId,
-        'commands': commands
+        'commands': commands,
+        'graphTypes': graphTypes
         }
     payload = json.dumps( payload )
     headers = { 'X-CSRFToken': csrf }
@@ -107,7 +107,7 @@ def register( clientInfoFile, commands, secretId = 'None' ):
         # Save received info to file
         with open( clientInfoFile, 'w') as client_info:
             json.dump( content, client_info )
-        print( 'Client info update successful' )
+        print( 'Client info updated' )
         print( 'Client name: ' + content[ 'name' ] )
         print( 'Current command: ' + content[ 'command' ] )
         return True

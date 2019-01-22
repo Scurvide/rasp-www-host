@@ -3,31 +3,45 @@ from web_comms import *
 import time, threading, os
 
 # Options
-deleteDataOnBoot    = False       # Reset device to register again on boot
-commands = [                      # Commands for this device
-    'stop',
-    'measurement',
-    'tally'
-    ]
+dataTypes = [{                  # Data type definitions
+    'dataType': 'distance',     # Datatype name
+    'measureMsg': '7',          # Msg for requesting correct action from Arduino
+    'graphType': 'point',       # Graph type that is shown online (point or bar)
+    'measureRequests': True,    # Allow measuring requests from online
+    'autoMeasuring': True       # Allow auto measuring setting
+    },{
+    'dataType': 'tally',
+    'measureMsg': '3',
+    'graphType': 'bar',
+    'measureRequests': False,
+    'autoMeasuring': False
+    }]
+msgResetTally   = '4'   # Message for resetting tally counter
 # Client info storage location
-clientInfoFile  = '/home/pi/DataCollection/RaspFiles/client_info.json'
-commandRefreshTime  = 3           # (Seconds) Time interval for rechecking commands from online server
-mainLoopInterval    = 1           # (Seconds) Time interval for mainLoop
-sleepAfterDistance  = 1           # (Seconds) Sleep after distance measurement
+clientInfoFile          = '/home/pi/DataCollection/RaspFiles/client_info.json'
+deleteDataOnBoot        = False         # Reset device to register again on boot
+commandRefreshTime      = 0.5           # (Seconds) Time interval for rechecking commands from online server
+mainLoopInterval        = 0.5           # (Seconds) Time interval for mainLoop
+sleepAfterAutoMeasure   = 1.0           # (Seconds) Sleep after auto measurement
 
 # Variables
+commands = []
+graphTypes = []
+for type in dataTypes:                  # Build command type list for this device
+    commands.append( type[ 'dataType' ] )
+    graphTypes.append( type[ 'graphType' ] )
 command = ''
 data = 0
 unit = ''
 endProgram = False
 
 def registration():
-    res = register( clientInfoFile, commands )
+    res = register( clientInfoFile, commands, graphTypes )
     while res != True:
         if res == 'Reset':
             os.remove( clientInfoFile )
             print( 'Client info file deleted to request new Id on next try' )
-            res = register( clientInfoFile, commands )
+            res = register( clientInfoFile, commands, graphTypes )
         else:
             return False
     return True
@@ -35,7 +49,7 @@ def registration():
 def getCommand():
     with open( clientInfoFile ) as client_info:
         file = json.load(client_info)
-    return file[ 'command' ]
+    return file[ 'command' ], file['measure'], file[ 'autoMeasure' ]
 
 def mainLoop( lastRefresh = time.time() ):
 
@@ -49,34 +63,36 @@ def mainLoop( lastRefresh = time.time() ):
                 print( 'Command refresh failed' )
             print( '---------------------------------' )
 
-        command = getCommand()
+        command, requested, autoMeasure = getCommand()
 
-        if command == 'measurement':
-            data, unit = getMeasurement()
-            if data != False:
-                if not postData( clientInfoFile, data, unit ):
-                    print( 'Data could not be saved' )
-            print( '---------------------------------' )
-            time.sleep( sleepAfterDistance )
+        for type in dataTypes:
+            if ( (command == type[ 'dataType' ] and type[ 'measureRequests' ] == False) or
+                    (type[ 'measureRequests' ] == True and requested == True) or
+                    (type[ 'autoMeasuring' ] == True and autoMeasure == True) ):
 
-        if command == 'tally':
-            data = tally()
-            if data != False:
-                if not postData( clientInfoFile, data ):
-                    print( 'Data could not be saved' )
+                data, unit = getMeasurement( type[ 'measureMsg' ] )
+                if data != False:
+                    if not postData( clientInfoFile, data, unit, type[ 'dataType' ] ):
+                        print( 'Data could not be saved' )
+                else:
+                    print( 'Tally checked' )
                 print( '---------------------------------' )
-            else:
-                print( 'Tally checked' )
-                print( '---------------------------------' )
+
+                if type[ 'autoMeasuring' ] == True and autoMeasure == True:
+                    time.sleep( sleepAfterAutoMeasure )
 
         time.sleep(mainLoopInterval)
     # Exceute mainLoop every mainLoopInterval seconds
     #threading.Timer(mainLoopInterval, mainLoop, [lastRefresh]).start()
 
+def measureAndPost( msg ):
+    data, unit = getMeasurement( msg )
+
 def initialization():
+    print( ' ' )
+    print( 'Initializing...' )
     if deleteDataOnBoot == True:
         os.remove( clientInfoFile )
-        print( ' ' )
         print( 'Client info deleted - deleteDataOnBoot option was True')
         print( '---------------------------------' )
 

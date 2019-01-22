@@ -1,11 +1,12 @@
 import serial, time
 
 # Settings
-usbDevice   = '/dev/ttyACM0'
-serialPort  = 9600
-timeout     = 5     # Seconds
-msgDistance = '7'   # Message for returning distance
-msgTally    = '3'   # Message for tally counting
+usbDevice       = '/dev/ttyACM0'
+serialPort      = 9600
+timeout         = 5     # Seconds
+msgDistance     = '7'   # Message for returning distance
+msgTally        = '3'   # Message for tally counting
+msgResetTally   = '4' # Message for resetting tally counter
 
 # Open serial connection
 ard = serial.Serial( usbDevice, serialPort, timeout = timeout )
@@ -13,17 +14,17 @@ ard = serial.Serial( usbDevice, serialPort, timeout = timeout )
 time.sleep( 2 )
 
 # Returns sensor output and unit or False if data collection failed
-def getMeasurement():
+def getMeasurement( msg ):
 
     # Flush input buffer
     ard.reset_input_buffer()
 
     # Send request to Arduino
-    ard.write( msgDistance )
+    ard.write( msg )
     # Read response from Arduino
     output = ''
     output = ard.readline()
-
+    
     if output != '' and output != b'':
         # Measurement value and unit are separated by ';' in serial line
         # endline == '\r\n' which is removed with .splitlines()
@@ -32,9 +33,9 @@ def getMeasurement():
 
         if len( serialData ) == 1 or len( serialData ) == 2:
             try:
-                value = int( serialData[0] )
+                value = float( serialData[0] )
             except ValueError:
-                print( 'Measurement value not integer' )
+                print( 'Could not turn number to float' )
                 return False
             unit = ''
             if len( serialData ) == 2:
@@ -43,11 +44,13 @@ def getMeasurement():
             if value > 0:
                 print( 'Measured value: ' + str(value) + unit )
                 return value, unit
-
+            else:
+                return False, ''
     print( 'Failed to receive measurement data' )
     return False, ''
 
 # Returns True if something goes past
+"""
 def tally():
 
     # Send command to Arduino
@@ -71,3 +74,4 @@ def tally():
         ard.reset_input_buffer()
         print( 'Serial input buffer reset' )
     return False
+"""

@@ -16,7 +16,12 @@ def index( request ):
 # Collects client data for viewing
 def client_data( request, client ):
 
-    cli = Client.objects.get( name = client )
+    try:
+        cli = Client.objects.get( name = client )
+    except ObjectDoesNotExist:
+        response = HttpResponse( 'No such client found' )
+        response.status_code = 404
+        return response
     allDataPoints = Datapoint.objects.filter( client = cli )
     commands = Command.objects.filter( client = cli )
 

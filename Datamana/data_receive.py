@@ -35,6 +35,7 @@ def index( request ):
         command = payload[ 'command' ]
         point = payload[ 'point' ]
         unit = payload[ 'unit' ]
+        measure = payload[ 'measure' ]
 
         # Check if client id exists
         try:
@@ -56,20 +57,23 @@ def index( request ):
         # Create new data point
         data = Datapoint.objects.create( client = client, command = com, point = point, unit = unit )
 
-        # If measurement was command set it to stop
-        #if command == 'measurement':
-        #    client.current_command = 'stop'
+        # If measure was true, set it to false
+        if measure == True:
+            client.measure = False
+            client.save()
 
         # Construct response with current command for operation
         response = json.dumps({
+            'secretId': client.secretId,
+            'name': client.name,
             'command': client.current_command,
-            'msg':
-            'Datapoint successfully saved to database. Client('
-            + client.name +
-            ') Data type('
-            + com.name +
-            ') Point('
-            + str(data.point) + data.unit + ')'
+            'measure': client.measure,
+            'autoMeasure': client.autoMeasure
+            #'msg':
+            #'Datapoint successfully saved to database. Client('
+            #+ client.name +
+            #') Point('
+            #+ str(data.point) + data.unit + ')'
             })
         return HttpResponse( response )
 
