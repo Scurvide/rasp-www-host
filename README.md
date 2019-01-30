@@ -109,7 +109,7 @@ dataTypes = [{                  # Data type definitions
 #### Move RaspFiles to Raspberry Pi
 Move RaspFiles folder to your Raspberry Pi user folder
 ```sh
-/home/pi/RaspFiles'
+/home/pi/RaspFiles
 ```
 
 #### Set Raspberry Pi to Start the App on Boot
@@ -117,7 +117,7 @@ A good guide for setting this up can be found here
 https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/  
 The program to start running the app is
 ```sh
-/home/pi/RaspFiles/main.py'
+/home/pi/RaspFiles/main.py
 ```
 
 ### Arduino Setup
