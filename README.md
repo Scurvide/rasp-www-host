@@ -36,19 +36,19 @@ Install requirements with
 ```sh
 $ pip install -r requirements.txt
 ```
-Check local ip address
+Check local IP address
 ```sh
 $ ifconfig
 ```
-Check value inet for local ip address, probably something like 192.168.X.X  
-Add the ip address in RaspWWW/settings.py to allowed hosts
+Check value inet for local IP address, probably something like 192.168.X.X  
+Add the IP address in RaspWWW/settings.py to allowed hosts
 ```sh
 ALLOWED_HOSTS = [
   '192.168.X.X',
   'localhost',
 ]
 ```
-Run the server with the local ip address and port 8000
+Run the server with the local IP address and port 8000
 ```sh
 $ python manage.py runserver 192.168.X.X:8000
 ```
@@ -146,8 +146,8 @@ python main.py
 If everything is configured correctly, the app should now register itself and start sending data to the website. Running the app manually prints any error messages to you that the app encounters.
 
 ### Arduino
-Arduino passively collects data. In this case the collected data is from an ultrasonic sensor which measures distance. The collected data is stored in Arduino until a correct message from Raspberry Pi via USB Serial is recieved. Once a message is recieved the Arduino will write back to the serial the data point corresponding the message recieved. In this case either latest distance measurement or tally count of things that passed by the sensor.  
-Arduino recieves simple numbers to determine what data to write back to serial
+Arduino passively collects data. In this case the collected data is from an ultrasonic sensor which measures distance. The collected data is stored in Arduino until a correct message from Raspberry Pi via USB Serial is received. Once a message is received the Arduino will write back to the serial the data point corresponding the message received. In this case either latest distance measurement or tally count of things that passed by the sensor.  
+Arduino receives simple numbers to determine what data to write back to serial
 ```sh
 const int msgDistance   = '7';  // Message for returning current distance reading
 const int msgTally      = '3';  // Message for returning 1 when something passes by
@@ -167,7 +167,7 @@ Serial.println(cm);
 to write to serial. The serial line writing must end with 'Serial.println()'.
 
 ### Raspberry Pi
-Raspberry Pi communicates with the Arduino via USB Serial and the website via HTTP protocol. When sending data or registering to the website the Raspberry Pi informs the website of measurements it can make and then recieves instructions from the website on how to operate the measuring. Instructions and client information are stored to file on Raspberry Pi and with it can continue it's operation even after rebooting. Based on the instructions the Raspberry Pi writes messages to Arduino and recieves data corresponding the message written via serial. Data is then passed to the website where it is stored. Raspberry Pi updates the instructions whenever it communicates with the website.  
+Raspberry Pi communicates with the Arduino via USB Serial and the website via HTTP protocol. When sending data or registering to the website the Raspberry Pi informs the website of measurements it can make and then receives instructions from the website on how to operate the measuring. Instructions and client information are stored to file on Raspberry Pi and with it can continue its operation even after rebooting. Based on the instructions the Raspberry Pi writes messages to Arduino and receives data corresponding the message written via serial. Data is then passed to the website where it is stored. Raspberry Pi updates the instructions whenever it communicates with the website.  
 Supported data collection types are written in following format to RaspFiles/main.py
 ```sh
 dataTypes = [{                  # Data type definitions
@@ -181,7 +181,7 @@ dataTypes = [{                  # Data type definitions
 ```
 
 ### Website
-Website stores data recieved from connected clients (Raspberry Pi) and includes a timestamp when it was saved. It then can present the data in graphs that has the latest 20 data points shown (Can be changed). User can choose from commands on the website to alter the operation of the Raspberry Pi data collection in predefined manner. User chosen command options are first stored in the website database and then passed to client as response the next time the client takes contact with the website. The website has syntax check that returns messages to help troubleshooting wrong syntax in sent data packages. The website can also delete clients and its data from the database which results in client having to reregister itself with the website.  
+Website stores data received from connected clients (Raspberry Pi) and includes a timestamp when it was saved. It then can present the data in graphs that has the latest 20 data points shown (Can be changed). User can choose from commands on the website to alter the operation of the Raspberry Pi data collection in predefined manner. User chosen command options are first stored in the website database and then passed to client as response the next time the client takes contact with the website. The website has syntax check that returns messages to help troubleshooting wrong syntax in sent data packages. The website can also delete clients and its data from the database which results in client having to reregister itself with the website.  
 Data point amount shown in graphs can be changed in Datamana/data_view.py
 ```sh
 # Options
@@ -194,7 +194,7 @@ dataPointsShown = 20
 Jani Hietala
 
 #### Libraries and frameworks used
-| Library/Framwork | URL |
+| Library/Framework | URL |
 | ------ | ------ |
 | PySerial | https://pythonhosted.org/pyserial/ |
 | Requests | http://docs.python-requests.org/en/master/ |
