@@ -5,7 +5,7 @@
 - Website supports multiple Raspberry Pi data collectors at once
 
 ### Data Flowchart
-[Image here]
+[Flowchart](flowchart.png)
 
 ## Table of Contents
 - **Devices and Applications**
