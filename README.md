@@ -8,11 +8,10 @@
 [Image here]
 
 ## Table of Contents
-- Devices and applications
-- Installation
-- Usage
-- Operation
-- Credits
+- **Devices and Applications**
+- **Installation**
+- **Usage**
+- **Credits**
 
 ## Devices and Applications
 | Device/App | Model/Version | OS | Programming Language | Purpose |
@@ -51,7 +50,7 @@ ALLOWED_HOSTS = [
 ```
 Run the server with the local ip address and port 8000
 ```sh
-$ python manage.py runserver 192.168.X.X 8000
+$ python manage.py runserver 192.168.X.X:8000
 ```
 Website should now be accessible by your browser at address 192.168.X.X:8000  
 
@@ -93,7 +92,7 @@ urlRegister = 'http://192.168.X.X:8000/register/'  # Url for registering device
 Add path to where client info will be stored during operation.
 ```sh
 # Client info storage location
-clientInfoFile          = '/home/<Username>/RaspFiles/client_info.json'
+clientInfoFile          = '/home/pi/RaspFiles/client_info.json'
 ```
 Add collected data types settings as a dictionary to dataTypes list.  
 ```sh
@@ -110,11 +109,16 @@ dataTypes = [{                  # Data type definitions
 #### Move RaspFiles to Raspberry Pi
 Move RaspFiles folder to your Raspberry Pi user folder
 ```sh
-/home/<Username>/RaspFiles'
+/home/pi/RaspFiles'
 ```
 
 #### Set Raspberry Pi to Start the App on Boot
-
+A good guide for setting this up can be found here  
+https://www.dexterindustries.com/howto/run-a-program-on-your-raspberry-pi-at-startup/  
+The program to start running the app is
+```sh
+/home/pi/RaspFiles/main.py'
+```
 
 ### Arduino Setup
 - Make changes to file ArduinoFiles/Distance_Sensing/Distance_Sensing.ino for desired operation
@@ -131,8 +135,67 @@ const int msgResetTally = '4';  // Message for resetting tally counter
 Remember to make the same changes to RaspFiles/ard_comms.py serialPort and RaspFiles/main.py dataTypes list.
 
 ## Usage
+The most important thing to configure is the Arduino to collect desired data and send it forward to Raspberry Pi based on the messages given. Raspberry Pi also needs the data type dictionary to dataTypes list in RaspFiles/main.py. The rest of the application should work as it is as long as the connections are correctly set up.  
+**More in depth description on how each component functions can be found in comments on top of most files.**
+
 ### Run the App
 If the app is not set to start itself on boot, navigate to RaspFiles folder on Raspberry Pi and start the application with
 ```sh
 python main.py
 ```
+If everything is configured correctly, the app should now register itself and start sending data to the website. Running the app manually prints any error messages to you that the app encounters.
+
+### Arduino
+Arduino passively collects data. In this case the collected data is from an ultrasonic sensor which measures distance. The collected data is stored in Arduino until a correct message from Raspberry Pi via USB Serial is recieved. Once a message is recieved the Arduino will write back to the serial the data point corresponding the message recieved. In this case either latest distance measurement or tally count of things that passed by the sensor.  
+Arduino recieves simple numbers to determine what data to write back to serial
+```sh
+const int msgDistance   = '7';  // Message for returning current distance reading
+const int msgTally      = '3';  // Message for returning 1 when something passes by
+const int msgResetTally = '4';  // Message for resetting tally counter
+```
+Arduino then writes a row to serial in format that is understood by the Raspberry Pi
+```sh
+Serial.print(cm);
+Serial.print(";");
+Serial.println(unit);
+```
+Which results in 'cm;unit\r\n' to serial. Cm and unit are variables of which unit is optional.  
+If unit is left out, simply use
+```sh
+Serial.println(cm);
+```
+to write to serial. The serial line writing must end with 'Serial.println()'.
+
+### Raspberry Pi
+Raspberry Pi communicates with the Arduino via USB Serial and the website via HTTP protocol. When sending data or registering to the website the Raspberry Pi informs the website of measurements it can make and then recieves instructions from the website on how to operate the measuring. Instructions and client information are stored to file on Raspberry Pi and with it can continue it's operation even after rebooting. Based on the instructions the Raspberry Pi writes messages to Arduino and recieves data corresponding the message written via serial. Data is then passed to the website where it is stored. Raspberry Pi updates the instructions whenever it communicates with the website.  
+Supported data collection types are written in following format to RaspFiles/main.py
+```sh
+dataTypes = [{                  # Data type definitions
+    'dataType': 'distance',     # Datatype name
+    'measureMsg': '7',          # Msg for requesting correct action from Arduino
+    'graphType': 'point',       # Graph type that is shown online (point or bar)
+    'measureRequests': True,    # Allow measuring requests from online (on user click)
+    'autoMeasuring': True       # Allow auto measuring setting
+    },
+    { ... }]                    # Optional second dataType dictionary and so on
+```
+
+### Website
+Website stores data recieved from connected clients (Raspberry Pi) and includes a timestamp when it was saved. It then can present the data in graphs that has the latest 20 data points shown (Can be changed). User can choose from commands on the website to alter the operation of the Raspberry Pi data collection in predefined manner. User chosen command options are first stored in the website database and then passed to client as response the next time the client takes contact with the website. The website has syntax check that returns messages to help troubleshooting wrong syntax in sent data packages. The website can also delete clients and its data from the database which results in client having to reregister itself with the website.  
+Data point amount shown in graphs can be changed in Datamana/data_view.py
+```sh
+# Options
+dataPointsShown = 20
+```
+
+## Credits
+
+#### Creator
+Jani Hietala
+
+#### Libraries and frameworks used
+| Library/Framwork | URL |
+| ------ | ------ |
+| PySerial | https://pythonhosted.org/pyserial/ |
+| Requests | http://docs.python-requests.org/en/master/ |
+| Django | https://www.djangoproject.com/ |
