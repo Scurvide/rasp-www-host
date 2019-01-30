@@ -1,2 +1,4 @@
 .ftpconfig
 __pycache__/
+RaspFiles/client_info.json
+db.sqlite3

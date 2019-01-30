@@ -7,7 +7,7 @@ dataTypes = [{                  # Data type definitions
     'dataType': 'distance',     # Datatype name
     'measureMsg': '7',          # Msg for requesting correct action from Arduino
     'graphType': 'point',       # Graph type that is shown online (point or bar)
-    'measureRequests': True,    # Allow measuring requests from online
+    'measureRequests': True,    # Allow measuring requests from online (on user click)
     'autoMeasuring': True       # Allow auto measuring setting
     },{
     'dataType': 'tally',
