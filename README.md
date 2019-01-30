@@ -5,7 +5,7 @@
 - Website supports multiple Raspberry Pi data collectors at once
 
 ### Data Flowchart
-[Flowchart](flowchart.png)
+![Flowchart](https://raw.githubusercontent.com/Scurvide/rasp-www-host/master/flowchart.png)
 
 ## Table of Contents
 - **Devices and Applications**
