@@ -16,7 +16,7 @@ dataTypes = [{                  # Data type definitions
     'measureRequests': False,
     'autoMeasuring': False
     }]
-msgResetTally   = '4'   # Message for resetting tally counter
+# msgResetTally   = '4'   # Message for resetting tally counter
 # Client info storage location
 clientInfoFile          = '/home/pi/DataCollection/RaspFiles/client_info.json'
 deleteDataOnBoot        = False         # Reset device to register again on boot

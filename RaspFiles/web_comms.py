@@ -2,11 +2,8 @@ from requests.exceptions import ConnectionError
 import json, time, requests
 
 # Options
-#urlSend     = 'http://raspdatahost.herokuapp.com/send/'      # Url for sending data
-#urlRegister = 'http://raspdatahost.herokuapp.com/register/'  # Url for registering device
-# For internal testing
-urlSend     = 'http://192.168.1.107:8000/send/'
-urlRegister = 'http://192.168.1.107:8000/register/'
+urlSend     = 'http://raspdatahost.herokuapp.com/send/'      # Url for sending data
+urlRegister = 'http://raspdatahost.herokuapp.com/register/'  # Url for registering device
 
 timeout     = 5                                      # Request timeout (seconds)
 failTimeout = 2                                      # Timeout if connection fails
