@@ -26,7 +26,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     '192.168.1.107',
-    '192.168.11.2',
     'localhost',
 ]
 
@@ -128,5 +127,5 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 if "DYNO" in os.environ:
     import dj_database_url
     DATABASES["default"] = dj_database_url.config()
-    DEBUG = False
+    DEBUG = True
     ALLOWED_HOSTS = ['*']
